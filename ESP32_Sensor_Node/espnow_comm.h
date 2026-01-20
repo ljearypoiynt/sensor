@@ -32,4 +32,7 @@ bool initializeESPNOW();
 // Returns true if send was successful, false otherwise
 bool sendSensorData(struct_message &data);
 
+// Update ESP-NOW peer with new cloud node MAC address
+bool updateCloudNodePeer(uint8_t* newMacAddress);
+
 #endif // ESPNOW_COMM_H

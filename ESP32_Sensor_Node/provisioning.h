@@ -20,6 +20,8 @@
 #define SSID_CHAR_UUID      "0000ff01-0000-1000-8000-00805f9b34fb"
 #define PASSWORD_CHAR_UUID  "0000ff02-0000-1000-8000-00805f9b34fb"
 #define STATUS_CHAR_UUID    "0000ff03-0000-1000-8000-00805f9b34fb"
+#define DEVICE_INFO_CHAR_UUID "0000ff04-0000-1000-8000-00805f9b34fb"
+#define PROPERTIES_CHAR_UUID "0000ff05-0000-1000-8000-00805f9b34fb"
 
 // Provisioning state
 extern bool provisioningRequested;
@@ -28,6 +30,18 @@ extern bool deviceConnected;
 // BLE Objects
 extern BLEServer* pProvisioningServer;
 extern BLECharacteristic* pStatusCharacteristic;
+extern BLECharacteristic* pDeviceInfoCharacteristic;
+extern BLECharacteristic* pPropertiesCharacteristic;
+
+// Send device info (MAC address, device type, and properties)
+void sendDeviceInfo();
+
+// Property storage functions
+void saveDeviceProperties(float minDist, float maxDist, uint32_t refreshRate, float totalLitres, uint8_t* cloudMAC);
+bool loadDeviceProperties();
+bool hasStoredProperties();
+void saveCloudNodeMAC(uint8_t* macAddress);
+bool loadCloudNodeMAC(uint8_t* macAddress);
 
 // Initialize BLE provisioning service
 void initializeProvisioning();
@@ -55,5 +69,8 @@ bool getStoredWiFiCredentials(String& ssid, String& password);
 
 // Save WiFi credentials to NVS
 void saveWiFiCredentials(String ssid, String password);
+
+// Update properties status response
+void updatePropertiesStatus(String status);
 
 #endif // PROVISIONING_H

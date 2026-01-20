@@ -30,9 +30,12 @@ static const float VOLTAGE_DIVIDER_RATIO = 2.0f;
 static const uint64_t SLEEP_TIME_US = 5ULL * 60ULL * 1000000ULL; // 1 hour
 
 // ----------- Tank calibration (EDIT THESE) -----------
-static const float emptyDistanceCm = 120.0f;
-static const float fullDistanceCm  = 20.0f;
-static const float tankCapacityLitres = 900.0f;
+// These values can be updated via BLE from the frontend
+// Default values are used if no stored values exist
+extern float emptyDistanceCm;
+extern float fullDistanceCm;
+extern float tankCapacityLitres;
+extern uint32_t refreshRateSeconds;
 
 // ----------- Measurement settings -----------
 static const int samplesPerUpdate = 7;

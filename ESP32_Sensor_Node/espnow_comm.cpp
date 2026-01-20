@@ -294,3 +294,35 @@ bool sendSensorData(struct_message &data) {
   
   return false;
 }
+
+bool updateCloudNodePeer(uint8_t* newMacAddress) {
+  Serial.println("Updating ESP-NOW peer with new cloud node MAC...");
+  
+  // Remove the old peer if it exists
+  esp_now_del_peer(cloudNodeAddress);
+  
+  // Copy new MAC address to cloudNodeAddress (already done in saveCloudNodeMAC, but just to be safe)
+  memcpy(cloudNodeAddress, newMacAddress, 6);
+  
+  Serial.print("New Cloud Node MAC: ");
+  for (int i = 0; i < 6; i++) {
+    Serial.printf("%02X", cloudNodeAddress[i]);
+    if (i < 5) Serial.print(":");
+  }
+  Serial.println();
+  
+  // Scan for the new cloud node
+  int newChannel = scanForCloudNode();
+  
+  if (newChannel > 0) {
+    detectedChannel = newChannel;
+    savedChannel = newChannel;
+    Serial.print("✓ Found new Cloud Node on channel: ");
+    Serial.println(detectedChannel);
+    return true;
+  } else {
+    Serial.println("✗ Could not find new Cloud Node on any channel");
+    Serial.println("  ESP-NOW peer will be updated on next reboot");
+    return false;
+  }
+}

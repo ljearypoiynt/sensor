@@ -21,6 +21,13 @@ uint8_t cloudNodeAddress[6] = {0x0C, 0x4E, 0xA0, 0x4D, 0x54, 0x8C}; // REPLACE W
 //uint8_t cloudNodeAddress[6] = {0x0C, 0x4E, 0xA0, 0x4D, 0x54, 0x78}; //oil2
 struct_message sensorData;
 
+// Device properties (can be updated via BLE)
+// Default values - will be overridden if stored values exist
+float emptyDistanceCm = 120.0f;
+float fullDistanceCm = 20.0f;
+float tankCapacityLitres = 900.0f;
+uint32_t refreshRateSeconds = 300;
+
 // BLE variables
 BLEServer* pServer = NULL;
 bool btEnabled = false;
@@ -33,6 +40,29 @@ void setup() {
   delay(1500);
 
   LOG("Sensor Node Booting");
+  Serial.println("========================================");
+
+  // Load stored device properties (if any)
+  if (hasStoredProperties()) {
+    loadDeviceProperties();
+  } else {
+    Serial.println("No stored properties - using defaults");
+    Serial.printf("  Min Distance: %.1f cm\n", fullDistanceCm);
+    Serial.printf("  Max Distance: %.1f cm\n", emptyDistanceCm);
+    Serial.printf("  Refresh Rate: %u seconds\n", refreshRateSeconds);
+    Serial.printf("  Total Litres: %.1f L\n", tankCapacityLitres);
+  }
+  
+  // Load stored cloud node MAC address (if any)
+  if (!loadCloudNodeMAC(cloudNodeAddress)) {
+    Serial.println("No stored Cloud Node MAC - using default from code");
+    Serial.print("  Default Cloud MAC: ");
+    for (int i = 0; i < 6; i++) {
+      Serial.printf("%02X", cloudNodeAddress[i]);
+      if (i < 5) Serial.print(":");
+    }
+    Serial.println();
+  }
   Serial.println("========================================");
 
   // Check reset reason - only enable Bluetooth on cold boot
@@ -48,7 +78,7 @@ void setup() {
         
         // Try to connect with stored credentials
         if (connectToStoredWiFi()) {
-          Serial.println("✓ Connected to WiFi with stored credentials");
+          Serial.println(" Connected to WiFi with stored credentials");
           // WiFi is connected, skip provisioning
           
           // Enable basic BLE advertising for pairing only
@@ -57,9 +87,9 @@ void setup() {
           BLEDevice::startAdvertising();
           btEnabled = true;
           btStartTime = millis();
-          Serial.println("✓ BLE ENABLED for pairing (2 minutes)");
+          Serial.println(" BLE ENABLED for pairing (2 minutes)");
         } else {
-          Serial.println("✗ Failed to connect with stored credentials");
+          Serial.println(" Failed to connect with stored credentials");
           Serial.println("Entering provisioning mode...");
           
           // Clear invalid credentials and enter provisioning
@@ -67,7 +97,7 @@ void setup() {
           initializeProvisioning();
           provisioningMode = true;
           provisioningStartTime = millis();
-          Serial.println("✓ BLE Provisioning ACTIVE (5 minutes)");
+          Serial.println(" BLE Provisioning ACTIVE (5 minutes)");
         }
       } else {
         // No stored credentials - enter provisioning mode
@@ -76,7 +106,7 @@ void setup() {
         initializeProvisioning();
         provisioningMode = true;
         provisioningStartTime = millis();
-        Serial.println("✓ BLE Provisioning ACTIVE (5 minutes)");
+        Serial.println(" BLE Provisioning ACTIVE (5 minutes)");
       }
       
       Serial.print("Device name: ");
