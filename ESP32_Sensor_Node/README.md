@@ -171,7 +171,7 @@ struct_message {
 5. Device will save all settings and restart
 
 ## Operation
-d
+
 ### Normal Operating Cycle
 1. **Wake from deep sleep**
 2. **Load stored configuration** (WiFi, properties, gateway MAC)
